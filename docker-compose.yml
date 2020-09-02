@@ -10,5 +10,8 @@ services:
       - .:/app
     ports:
       - "5000:5000"
+    environment:
+      MG_HOST: memgraph
+      MG_PORT: 7687
     depends_on:
       - memgraph

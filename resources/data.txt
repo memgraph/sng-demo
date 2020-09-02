@@ -1,0 +1,77 @@
+CREATE (n:Role { name: 'Project Manager'});
+CREATE (n:Role { name: 'Analyst'});
+CREATE (n:Role { name: 'UI/UX'});
+CREATE (n:Role { name: 'Developer'});
+CREATE (n:Role { name: 'Tester'});
+CREATE (n:Role { name: 'System Administrator'});
+CREATE (n:Role { name: 'Client'});
+
+CREATE (n:Task { name: 'Analysis and Planning'});
+CREATE (n:Task { name: 'Designing'});
+CREATE (n:Task { name: 'Coding'});
+CREATE (n:Task { name: 'Testing'});
+CREATE (n:Task { name: 'Deployment'});
+CREATE (n:Task { name: 'Maintenance'});
+
+//Client
+MATCH (a:Role),(b:Task) WHERE a.name = 'Client' AND b.name = 'Analysis and Planning' CREATE (a)-[r:CONSULTED]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Client' AND b.name = 'Designing' CREATE (a)-[r:CONSULTED]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Client' AND b.name = 'Coding' CREATE (a)-[r:CONSULTED]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Client' AND b.name = 'Deployment' CREATE (a)-[r:CONSULTED]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Client' AND b.name = 'Maintenance' CREATE (a)-[r:INFORMED]->(b);
+
+//System Administrator
+MATCH (a:Role),(b:Task) WHERE a.name = 'System Administrator' AND b.name = 'Coding' CREATE (a)-[r:CONSULTED]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'System Administrator' AND b.name = 'Testing' CREATE (a)-[r:INFORMED]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'System Administrator' AND b.name = 'Deployment' CREATE (a)-[r:RESPONSIBLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'System Administrator' AND b.name = 'Maintenance' CREATE (a)-[r:RESPONSIBLE]->(b);
+
+//Tester
+MATCH (a:Role),(b:Task) WHERE a.name = 'Tester' AND b.name = 'Testing' CREATE (a)-[r:RESPONSIBLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Tester' AND b.name = 'Deployment' CREATE (a)-[r:SUPPORTIVE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Tester' AND b.name = 'Maintenance' CREATE (a)-[r:SUPPORTIVE]->(b);
+
+//Developer
+MATCH (a:Role),(b:Task) WHERE a.name = 'Developer' AND b.name = 'Analysis and Planning' CREATE (a)-[r:CONSULTED]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Developer' AND b.name = 'Designing' CREATE (a)-[r:CONSULTED]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Developer' AND b.name = 'Coding' CREATE (a)-[r:RESPONSIBLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Developer' AND b.name = 'Testing' CREATE (a)-[r:CONSULTED]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Developer' AND b.name = 'Deployment' CREATE (a)-[r:SUPPORTIVE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Developer' AND b.name = 'Maintenance' CREATE (a)-[r:SUPPORTIVE]->(b);
+
+//UI/UX
+MATCH (a:Role),(b:Task) WHERE a.name = 'UI/UX' AND b.name = 'Designing' CREATE (a)-[r:RESPONSIBLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'UI/UX' AND b.name = 'Coding' CREATE (a)-[r:SUPPORTIVE]->(b);
+
+//Analyst
+MATCH (a:Role),(b:Task) WHERE a.name = 'Analyst' AND b.name = 'Analysis and Planning' CREATE (a)-[r:RESPONSIBLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Analyst' AND b.name = 'Designing' CREATE (a)-[r:SUPPORTIVE]->(b);
+
+//Project Manager
+MATCH (a:Role),(b:Task) WHERE a.name = 'Project Manager' AND b.name = 'Analysis and Planning' CREATE (a)-[r:ACCOUNTABLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Project Manager' AND b.name = 'Designing' CREATE (a)-[r:ACCOUNTABLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Project Manager' AND b.name = 'Coding' CREATE (a)-[r:ACCOUNTABLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Project Manager' AND b.name = 'Testing' CREATE (a)-[r:ACCOUNTABLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Project Manager' AND b.name = 'Deployment' CREATE (a)-[r:ACCOUNTABLE]->(b);
+
+MATCH (a:Role),(b:Task) WHERE a.name = 'Project Manager' AND b.name = 'Maintenance' CREATE (a)-[r:ACCOUNTABLE]->(b);
