@@ -4,6 +4,7 @@ services:
     image: "memgraph"
     ports:
       - "7687:7687"
+    command: --data-directory /usr/share/memgraph/examples/Marvel
   corporate_struct:
     build: .
     volumes:

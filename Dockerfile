@@ -39,6 +39,8 @@ RUN poetry config virtualenvs.create false && \
 COPY . /app
 
 EXPOSE 5000
+ADD start.sh /
+RUN chmod +x /start.sh
 
 ENTRYPOINT [ "poetry", "run" ]
-CMD [ "flask", "run", "--host", "0.0.0.0" ]
+CMD ["/start.sh"]
