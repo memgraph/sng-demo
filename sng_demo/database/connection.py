@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Iterator
-from corporate_struct.database.models import Node, Relationship
+from sng_demo.database.models import Node, Relationship
 import mgclient
 
 

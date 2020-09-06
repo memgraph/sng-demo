@@ -13,9 +13,6 @@
         width = +svg.attr("width"),
         height = +svg.attr("height");
 
-    var color = d3.scaleOrdinal(d3.schemeCategory20);
-
-
     var simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id(function(d) { return d.id; }))
         .force("charge", d3.forceManyBody())
@@ -24,44 +21,23 @@
     let responseString = await response.json();
     let responseJSON = JSON.parse(responseString);
 
-    var nodeById = d3.map();
-
-    responseJSON.nodes.forEach(function(node) {
-        nodeById.set(node.id, node);
-    });
-
-    responseJSON.edges.forEach(function(link) {
-        link.source = nodeById.get(link.source);
-        link.target = nodeById.get(link.target);
-    });
-
     var link = svg.append("g")
         .attr("class", "links")
         .selectAll("line")
         .data(responseJSON.edges)
-        .enter().append("line")
-        .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+        .enter().append("line");
 
     var node = svg.append("g")
         .attr("class", "nodes")
-        .selectAll("g")
+        .selectAll("circle")
         .data(responseJSON.nodes)
-        .enter().append("g")
-
-    var circles = node.append("circle")
-        .attr("r", 10)
-        .attr("fill", function(d) { return color(d.group); })
+        .enter().append("circle")
+        .attr("r", 5.0)
+        .attr("fill", "darkgray")
         .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
             .on("end", dragended));
-
-    var lables = node.append("text")
-        .text(function(d) {
-            return d.name;
-        })
-        .attr('x', 6)
-        .attr('y', 3);
 
     node.append("title")
         .text(function(d) { return d.name; });
@@ -70,7 +46,8 @@
         .nodes(responseJSON.nodes)
         .on("tick", ticked);
 
-    simulation.force("link")
+    simulation
+        .force("link")
         .links(responseJSON.edges);
 
     function ticked() {
@@ -81,9 +58,8 @@
             .attr("y2", function(d) { return d.target.y; });
 
         node
-            .attr("transform", function(d) {
-                return "translate(" + d.x + "," + d.y + ")";
-            })
+            .attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; });
     }
 
     function dragstarted(d) {

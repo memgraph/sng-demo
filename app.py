@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, make_response
-from corporate_struct.database import Memgraph
-from corporate_struct import db_operations
+from sng_demo.database import Memgraph
+from sng_demo import db_operations
 
 app = Flask(__name__)
 
