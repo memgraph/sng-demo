@@ -9,19 +9,31 @@ app = Flask(__name__)
 @app.route('/index')
 def index():
     db = Memgraph()
-    #db_operations.clear(db)
-    #db_operations.import_data(db)
-
+    db_operations.clear(db)
+    db_operations.import_data(db)
     return render_template('index.html')
 
-@app.route("/get-graph", methods=["POST"])
-def create_entry():
-    db = Memgraph()
-    
-    req = request.get_json()
-    
-    print(db_operations.fetch_roles(db))
-    
-    res = make_response(jsonify(db_operations.fetch_relationships(db)), 200)
+@app.route('/query')
+def query():
+    return render_template('query.html')
 
-    return res
+@app.route("/get-graph", methods=["POST"])
+def get_graph():
+    db = Memgraph()
+    response = make_response(
+        jsonify(db_operations.get_graph(db)), 200)
+    return response
+
+@app.route('/get-users', methods=["POST"])
+def get_users():
+    db = Memgraph()
+    response = make_response(
+        jsonify(db_operations.get_users(db)), 200)
+    return response
+
+@app.route('/get-relationships', methods=["POST"])
+def get_relationships():
+    db = Memgraph()
+    response = make_response(
+        jsonify(db_operations.get_realtionships(db)), 200)
+    return response
