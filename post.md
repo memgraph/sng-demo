@@ -171,7 +171,32 @@ docker-compose build
 docker-compose up
 ```
 The URL of our web application is http://localhost:5000/. When you open it there should be a message **Hello World!** which means that the app is up and running.<br />
-Now it’s time to create a more complex web page that will contain our Social Network Graph. In the project root directory create a folder called `templates` and in it a file with the name `base.html`. This will be our base template for other sites. You can find its contents here: [base.html](https://github.com/g-despot/sng-demo/blob/master/templates/base.html).
+Now it’s time to create a more complex web page that will contain our Social Network Graph. In the project root directory create a folder called `templates` and in it a file with the name `base.html`. This will be our base template for other sites.<br /> 
+Copy the code:
+```html
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+
+    <title>Social Network Graph Demo</title>
+</head>
+
+<body>
+    {% block content %} {% endblock %}
+</body>
+
+</html>
+```
 We also need to create an HTML file for our actual landing site that utilizes this base file and an accompanying JS file. Create the HTML file in the same location with the name `index.html` and copy the following code into it:
 ```html
 {% extends 'base.html' %} {% block content %}
@@ -181,7 +206,7 @@ We also need to create an HTML file for our actual landing site that utilizes th
 <script src="/static/js/index.js" charset="utf-8"></script>
 {% endblock %}
 ```
-In the project root directory create a folder called `static` with one subfolder called `js` and another called `css`. The `js` folder will contain all of the needed local JavaScript files while the `css` folder will contain all the CSS stylesheets. In the `js` folder create a file called `index.js` and leave it empty for now.<br /><br />
+In the project root directory create a folder called `static` with one subfolder called `js` and another called `css`. The `js` folder will contain all of the needed local JavaScript files while the `css` folder will contain all the CSS stylesheets. In the `js` folder create a file called `index.js` and in the `css` folder one called `style.css`. Just leave them empty for now.<br /><br />
 If you want to find out more about web development with Flask I suggest you try out [this tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world).
 Your current project structure should like this:
 ```
@@ -320,7 +345,7 @@ def get_graph():
 ```
 
 This method is responsible for responding to POST requests from the client. It returns the graph data that we fetched from the server in the previous method.<br /><br />
-Now let's do something with this data! Copy the contents of the `index.js` file that you created earlier [from here](https://github.com/g-despot/sng-demo/blob/master/static/js/index.js). I don't want to go into much detail about how to use **D3.js** so if you want to find out more I encourage you to visit [their website](https://d3js.org/).<br />
+Now let's do something with this data! Copy the contents of the `index.js` file that you created earlier [from here](https://github.com/g-despot/sng-demo/blob/master/static/js/index.js) and do the same for the `style.css` file located [here](https://github.com/g-despot/sng-demo/blob/master/static/css/style.css). I don't want to go into much detail about how to use **D3.js** so if you want to find out more I encourage you to visit [their website](https://d3js.org/).<br />
 I short, we fetch all the nodes and edges from the database and add them to an SVG element. The visual representation of the graph is made by simulating how physical forces act on particles (charge and gravity). You can drag & drop the nodes and hover over them to see the value of their name property. There is also an option to zoom in and out of the graph and drag the SVG element.<br /><br />
 
 
@@ -333,14 +358,15 @@ I short, we fetch all the nodes and edges from the database and add them to an S
 # Additional Functionalities
  
  
-Go ahead and copy the file `query.js` to `/static/js/` and `query.html` to `/templates/`. In your `base.html` file add an additional navbar item:
+Go ahead and copy the file [`query.js`](https://github.com/g-despot/sng-demo/blob/master/static/js/query.js) to `static/js/` and [`query.html`](https://github.com/g-despot/sng-demo/blob/master/templates/query.html) to `/templates/`. In your `base.html` file add an additional navbar item:
  
 ```html
 <li class="nav-item">
    <a class="nav-link" href="{{ url_for('query')}}">Query Database</a>
 </li>
 ```
-This page with its queries will make your life easier if you want to debug the data being fetched from the server. It will return all the nodes and all the edges and show them in a JSON highlighted format.<br />
+Also, don't forget to copy the necessary methods from the [db_operations.py](https://github.com/g-despot/sng-demo/blob/master/sng_demo/db_operations.py) module and [app.py](https://github.com/g-despot/sng-demo/blob/master/app.py) module. After you made the necessary changes just open http://localhost:5000/query/ and see the results.
+This page will make your life easier if you want to debug the data being fetched from the server. It will return all the nodes and all the edges and show them in a JSON highlighted format.<br />
 Your current project structure should like this:
 ```
 sng-demo
@@ -377,5 +403,5 @@ sng-demo
 # Conclusion
 
 
-Even though graph databases have been around for a long time they are still not a mainstream tool in software development. This is a shame given that many problems could be much easier tackled with their help. A lot of data in the modern world is better suited for graph representation and graph databases offer built-in algorithms which are highly efficient on such datasets in comparison to the standard relational paradigm.<br />
-I hope that this tutorial can demonstrate how easy it is to use graph databases in conjuncture with other technologies.  
+Even though graph databases have been around for a long time they are still not a mainstream tool in software development. A lot of data in the modern world is better suited for graph representation and graph databases offer built-in algorithms which are highly efficient with such datasets in comparison to the standard relational paradigm.<br />
+I hope that this tutorial can demonstrate how easy it is to use graph databases with other techonoligies.
