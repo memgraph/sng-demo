@@ -99,6 +99,7 @@ CREATE (n:User { id:97, name: 'Summer'});
 CREATE (n:User { id:98, name: 'Eric'});
 CREATE (n:User { id:99, name: 'Kenny'});
 
+
 MATCH (a:User),(b:User) WHERE a.id = 0 AND b.id = 1 CREATE (a)-[r:FRIENDS]->(b);
 MATCH (a:User),(b:User) WHERE a.id = 0 AND b.id = 2 CREATE (a)-[r:FRIENDS]->(b);
 MATCH (a:User),(b:User) WHERE a.id = 0 AND b.id = 3 CREATE (a)-[r:FRIENDS]->(b);

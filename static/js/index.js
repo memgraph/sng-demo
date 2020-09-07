@@ -21,13 +21,16 @@
     let responseString = await response.json();
     let responseJSON = JSON.parse(responseString);
 
-    var link = svg.append("g")
+    var g = svg.append("g")
+        .attr("class", "everything");
+
+    var link = g.append("g")
         .attr("class", "links")
         .selectAll("line")
-        .data(responseJSON.edges)
+        .data(responseJSON.links)
         .enter().append("line");
 
-    var node = svg.append("g")
+    var node = g.append("g")
         .attr("class", "nodes")
         .selectAll("circle")
         .data(responseJSON.nodes)
@@ -48,7 +51,15 @@
 
     simulation
         .force("link")
-        .links(responseJSON.edges);
+        .links(responseJSON.links);
+    var zoom_handler = d3.zoom()
+        .on("zoom", zoom_actions);
+
+    zoom_handler(svg);
+
+    function zoom_actions() {
+        g.attr("transform", d3.event.transform)
+    }
 
     function ticked() {
         link

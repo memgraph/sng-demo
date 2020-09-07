@@ -68,6 +68,6 @@ def get_graph(db):
             data = {"id": n2.id, "name": n2.properties['name']}
             node_objects.append(data)
             added_nodes.append(n2.id)
-    data = {"edges": link_objects, "nodes": node_objects}
+    data = {"links": link_objects, "nodes": node_objects}
 
     return json.dumps(data)
