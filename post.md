@@ -1,4 +1,5 @@
-# Introduction
+# How to Build a Social Network Graph Web Application
+## Introduction
  
  
 When you think about a web application, a graph database doesn’t usually spring to mind. Instead, most people just take the familiar route of using an SQL database to store information. While this is perfectly acceptable for most use cases there are sometimes those that would see tremendous benefits by using a graph database.
@@ -11,7 +12,7 @@ In this tutorial, I will go through most of the code so you get a basic understa
    <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Social_Network_Analysis_Visualization.png" alt="Data Model" width="600"/>
 <p/>
 
-# Prerequisites
+## Prerequisites
  
  
 Because we are building a complete web application there is a number of tools that you will need to install before we begin:
@@ -21,7 +22,7 @@ Because we are building a complete web application there is a number of tools th
 * **[Memgraph DB](https://docs.memgraph.com/memgraph/quick-start)**: a native fully distributed in-memory graph database built to handle real-time use-cases at enterprise scale. **Follow the Docker Installation instructions.** While it's completely optional I encourage you to also install **[Memgraph Lab](https://memgraph.com/product/lab)** so you can execute Cypher queries on the database directly and see visualized results.
 <br /><br />
 
-# Creating a Poetry Project
+## Creating a Poetry Project
 
 
 Because packaging systems and dependency management in Python can sometimes be confusing for beginners we decided to go with Poetry.
@@ -49,7 +50,7 @@ In this tutorial, we won’t use the testing functionalities so go on ahead and 
 Now you need to add the dependencies for our project. Given that we are going to run the app inside a Docker container we don't need the dependencies installed locally, only inside the container. Copy the files [`project.toml`](https://github.com/g-despot/sng-demo/blob/master/pyproject.toml) and [`poetry.lock`](https://github.com/g-despot/sng-demo/blob/master/poetry.lock) and place them in the root directory of the project.<br /><br />
  
  
-# Dockerizing an Application
+## Dockerizing an Application
  
  
 In the root directory of the project create two files, `Dockerfile` and `docker-compose.yml`. At the beginning of the `Dockerfile`, we specify the desired version of Python and instruct the container to install CMake, poetry, mgclient and pymgclient. Poetry is necessary to manage our dependencies inside the container while CMake and mgclient are required for pymgclient, the Python driver for Memgraph DB. You don’t have to focus too much on this part just copy the code to your Dockerfile:
@@ -129,7 +130,7 @@ Finally, we have a dockerized project that utilizes Poetry! This is a wonderful 
 <br /><br />
 
 
-# Web Development with Flask
+## Web Development with Flask
  
  
 Flask is very simple to use so why not create a **Hello World!** page to try out our Docker+Poetry setup.<br /> 
@@ -231,7 +232,7 @@ sng-demo
 <br />
 
  
-# The Data Model and Database Connection
+## The Data Model and Database Connection
  
 
 In the app directory `sng-demo` create a folder named database. This folder will contain all of the modules that we need to communicate with the database. You can find them [here](https://github.com/g-despot/sng-demo/tree/master/sng_demo/database) and just copy their contents. They are closely related to the database driver and if you wish to examine them a bit more I suggest you look up the driver documentation [here](https://github.com/memgraph/pymgclient). 
@@ -355,7 +356,7 @@ I short, we fetch all the nodes and edges from the database and add them to an S
 <br />
  
 
-# Additional Functionalities
+## Additional Functionalities
  
  
 Go ahead and copy the file [`query.js`](https://github.com/g-despot/sng-demo/blob/master/static/js/query.js) to `static/js/` and [`query.html`](https://github.com/g-despot/sng-demo/blob/master/templates/query.html) to `/templates/`. In your `base.html` file add an additional navbar item:
@@ -400,7 +401,7 @@ sng-demo
 <br />
 
 
-# Conclusion
+## Conclusion
 
 
 Even though graph databases have been around for a long time they are still not a mainstream tool in software development. A lot of data in the modern world is better suited for graph representation and graph databases offer built-in algorithms which are highly efficient with such datasets in comparison to the standard relational paradigm.<br />
