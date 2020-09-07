@@ -4,7 +4,7 @@
 When you think about a web application, a graph database doesn’t usually spring to mind. Instead, most people just take the familiar route of using an SQL database to store information. While this is perfectly acceptable for most use cases there are sometimes those that would see tremendous benefits by using a graph database.
 In this tutorial, I will show you how to make a basic web application using Flask that stores all of its information in a graph database. To be more precise we are using Memgraph DB, an in-memory database that can easily handle a lot of information and perform read/write instructions quite quickly.<br /><br />
 Our use case is a Social Network Graph (in the code referred to as **SNG** for convenience) representing users and the connections between them. Usually, such a graph would contain millions of nodes and edges and the algorithms that are performed on them don’t do well with data being stored in relational databases.<br /><br />
-In this tutorial, I will go through most of the code so you get a basic understanding even if you are not that familiar with some of the technologies used. You can also find all of [the code here]() if you don't want to type it as you read.
+In this tutorial, I will go through most of the code so you get a basic understanding even if you are not that familiar with some of the technologies used. You can also find all of [the code here](https://github.com/g-despot/sng-demo) if you don't want to type it as you read.
  
 <br /><br />
 <p align="center">
@@ -46,7 +46,7 @@ sng-demo
  
 In this tutorial, we won’t use the testing functionalities so go on ahead and delete the directory `tests` as well as the file `README.rst`.
  
-Now you need to add the dependencies for our project. Given that we are going to run the app inside a Docker container we don't need the dependencies installed locally, only inside the container. Copy the files `project.toml` and `poetry.lock` [from here]() and place them in the root directory of the project.<br /><br />
+Now you need to add the dependencies for our project. Given that we are going to run the app inside a Docker container we don't need the dependencies installed locally, only inside the container. Copy the files [`project.toml`](https://github.com/g-despot/sng-demo/blob/master/pyproject.toml) and [`poetry.lock`](https://github.com/g-despot/sng-demo/blob/master/poetry.lock) and place them in the root directory of the project.<br /><br />
  
  
 # Dockerizing an Application
@@ -171,7 +171,7 @@ docker-compose build
 docker-compose up
 ```
 The URL of our web application is http://localhost:5000/. When you open it there should be a message **Hello World!** which means that the app is up and running.<br />
-Now it’s time to create a more complex web page that will contain our Social Network Graph. In the project root directory create a folder called `templates` and in it a file with the name `base.html`. This will be our base template for other sites. You can find its contents here: [base.html]().
+Now it’s time to create a more complex web page that will contain our Social Network Graph. In the project root directory create a folder called `templates` and in it a file with the name `base.html`. This will be our base template for other sites. You can find its contents here: [base.html](https://github.com/g-despot/sng-demo/blob/master/templates/base.html).
 We also need to create an HTML file for our actual landing site that utilizes this base file and an accompanying JS file. Create the HTML file in the same location with the name `index.html` and copy the following code into it:
 ```html
 {% extends 'base.html' %} {% block content %}
@@ -209,7 +209,7 @@ sng-demo
 # The Data Model and Database Connection
  
 
-In the app directory `sng-demo` create a folder named database. This folder will contain all of the modules that we need to communicate with the database. You can find them [here]() and just copy their contents. They are closely related to the database driver and if you wish to examine them a bit more I suggest you look up the driver documentation [here](https://github.com/memgraph/pymgclient). 
+In the app directory `sng-demo` create a folder named database. This folder will contain all of the modules that we need to communicate with the database. You can find them [here](https://github.com/g-despot/sng-demo/tree/master/sng_demo/database) and just copy their contents. They are closely related to the database driver and if you wish to examine them a bit more I suggest you look up the driver documentation [here](https://github.com/memgraph/pymgclient). 
 In the app directory `sng-demo` create the module `db_operations.py`. This is where all the database related commands will be located. 
 The `sng_demo` directory should look like:
  
@@ -229,7 +229,7 @@ There is only one node with the label `User` and each `User` has two properties,
 <img src="https://github.com/g-despot/images/blob/master/user.png?raw=true" alt="Data Model" width="250"/>
 <p/>
  
-There are several methods to populate a database ([more on that here](https://docs.memgraph.com/memgraph/how-to-guides-overview/import-data)) but we will be doing it manually by executing Cypher queries so you can get a better understanding of how to communicate with the database. You will find all the necessary queries to populate our database in the file `data.txt` [here](). In the project root directory create a folder called `resources` and place the file `data.txt` in it. Now you can add an import method to your web application.<br />
+There are several methods to populate a database ([more on that here](https://docs.memgraph.com/memgraph/how-to-guides-overview/import-data)) but we will be doing it manually by executing Cypher queries so you can get a better understanding of how to communicate with the database. You will find all the necessary queries to populate our database in the files [`data_big.txt`](https://github.com/g-despot/sng-demo/blob/master/resources/data_big.txt) and [`data_small.txt`](https://github.com/g-despot/sng-demo/blob/master/resources/data_small.txt). The former just has a larger dataset than the latter. In the project root directory create a folder called `resources` and place the files in it. Now you can add an import method to your web application.<br />
 In the module db_operations.py add the following imports and methods:
  
 ```python
@@ -256,7 +256,7 @@ In the module `app.py` change the method `index()` to:
 def index():
   db = Memgraph()
   db_operations.clear(db)
-  db_operations.populate_database(db, "resources/data.txt")
+  db_operations.populate_database(db, "resources/data_big.txt")
   return render_template('index.html')
 ```
 Every time we refresh our index page the database is cleared and repopulated with new data. While this is not suitable for the production stage it is highly usefull during development because it will enable us to make changes in the data without having to restart the whole application or working directly on the database.<br />
@@ -320,8 +320,8 @@ def get_graph():
 ```
 
 This method is responsible for responding to POST requests from the client. It returns the graph data that we fetched from the server in the previous method.<br /><br />
-Now let's do something with this data! Copy the contents of the `index.js` file that you created earlier [from here](). I don't want to go into much detail about how to use **D3.js** so if you want to find out more I encourage you to visit [their website](https://d3js.org/).<br />
-I short, we fetch all the nodes and edges from the database and add them to an SVG element. The visual representation of the graph is made by simulating how physical forces act on particles (charge and gravity). You can drag & drop the nodes and hover over them to see the value of their name property.<br /><br />
+Now let's do something with this data! Copy the contents of the `index.js` file that you created earlier [from here](https://github.com/g-despot/sng-demo/blob/master/static/js/index.js). I don't want to go into much detail about how to use **D3.js** so if you want to find out more I encourage you to visit [their website](https://d3js.org/).<br />
+I short, we fetch all the nodes and edges from the database and add them to an SVG element. The visual representation of the graph is made by simulating how physical forces act on particles (charge and gravity). You can drag & drop the nodes and hover over them to see the value of their name property. There is also an option to zoom in and out of the graph and drag the SVG element.<br /><br />
 
 
 <p align="center">
@@ -344,6 +344,9 @@ This page with its queries will make your life easier if you want to debug the d
 Your current project structure should like this:
 ```
 sng-demo
+├── resources
+│  ├── data_big.py
+│  └── data_small.txt
 ├── sng_demo
 │  ├── db_operations.py
 │  └── database
