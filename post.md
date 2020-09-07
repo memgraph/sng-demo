@@ -25,8 +25,8 @@ Because we are building a complete web application there is a number of tools th
 ## Creating the Project Structure and Handling Dependencies
 
 
-Sometimes standard packaging systems and dependency management in Python can be confusing for beginners so we decided to use Poetry.
-Creating our project structure can easily be done by using Poetry.<br />Choose a working directory and run:
+Sometimes standard packaging systems and dependency management in Python can be confusing for beginners so we decided to use Poetry.<br />
+To start building our project structure choose a working directory and run:
  
 ```
 poetry new sng-demo
@@ -88,7 +88,7 @@ Next, we define the working directory with:
 WORKDIR /app
 COPY poetry.lock pyproject.toml /app/
 ```
-This second command will enable us to cache the project requirements and only reinstall them when `pyproject.toml` or `poetry.lock` are changed. 
+The second command will enable us to cache the project requirements and only reinstall them when `pyproject.toml` or `poetry.lock` are changed. 
 ```dockerfile
 RUN poetry config virtualenvs.create false && \
   poetry install --no-interaction --no-ansi
@@ -108,28 +108,28 @@ If you followed the instructions on [how to setup Memgraph DB with Docker](https
 ```yaml
 version: '3'
 services:
-memgraph:
-  image: "memgraph"
-  ports:
-    - "7687:7687"
-sng_demo:
-  build: .
-  volumes:
-    - .:/app
-  ports:
-    - "5000:5000"
-  environment:
-    MG_HOST: memgraph
-    MG_PORT: 7687
-  depends_on:
-    - memgraph
+  memgraph:
+    image: "memgraph"
+    ports:
+      - "7687:7687"
+  sng_demo:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    environment:
+      MG_HOST: memgraph
+      MG_PORT: 7687
+    depends_on:
+      - memgraph
 ```
 When it comes to the `ports` key, there is an important distinction between the **HOST_PORT** and the **CONTAINER_PORT**. The first number in the key is the **HOST_PORT** and it can be used to connect from your host machine to the service (for example with Memgraph Lab). The second number specifies the **CONTAINER_PORT** which is used for service-to-service communication. More precisely, our service `sng_db` can use this port to access the service `memgraph` and connect to the database.
  
 The `environment` key contains `MG_HOST` and `MG_PORT` which respresent environment variables in the service’s container. They store the `memgraph` service address and port which are needed to establish a database connection.
 The `depends_on` key is used to start services in dependency order because we need the database to start before the web application.
  
-The `build` key allows us to tell Compose where to find the build instructions as well as the files and/or folders used during the build process. By using the `volumes` key we bypass the need to constantly restart our image to load new changes to it from the host machine.
+The `build` key allows us to tell Compose where to find the build instructions as well as the files and/or folders used during the build process. By using the `volumes` key, we bypass the need to constantly restart our image to load new changes to it from the host machine.
  
 Finally, we have a dockerized project that utilizes Poetry! This aproach is great for development because it enables us to run our project on completely different operating systems and environments without having to worry about compatibility issues.
 <br /><br />
@@ -168,18 +168,22 @@ ADD start.sh /
 RUN chmod +x /start.sh
 ```
 The command `chmod +x` makes the script executable by setting the right permission.<br /> 
-To execute the script add the following command after `ENTRYPOINT [ "poetry", "run" ]`:
+To execute the script, add the following command after the line `ENTRYPOINT [ "poetry", "run" ]`:
 ```dockerfile
 CMD ["/start.sh"]
 ```
-That’s it! Our first web page is ready so let’s start our app to make sure we don’t have any errors. In the project root directory execute:
+That’s it! Our first web page is ready so let’s start our app to make sure we don’t have any errors.<br /> 
+In the project root directory execute:
 ```shell
 docker-compose build
+```
+The first build will take some time because Docker has to donwload and install a lot of dependencies.<br /> 
+After it finishes run:
+```shell
 docker-compose up
 ```
-The URL of our web application is http://localhost:5000/. When you open it there should be a message **Hello World!** which means that the app is up and running.<br />
-Now it’s time to create a more complex web page that will contain our Social Network Graph. In the project root directory create a folder called `templates` and in it a file with the name `base.html`. This will be our base template for other pages.<br /> 
-Copy the code:
+The URL of our web application is http://localhost:5000/. When you open it there should be a message **Hello World!** which means that the app is up and running.<br /><br />
+Now it’s time to create a more complex web page that will contain our Social Network Graph. In the project root directory create a folder called `templates` and in it a file with the name `base.html`. This will be our base HTML template for other pages. Copy the code:
 ```html
 <!doctype html>
 <html lang="en">
@@ -243,10 +247,11 @@ sng-demo
 
 In the app directory `sng-demo` create a folder called `database`. This folder will contain all of the modules that we need to communicate with the database. You can find them [here](https://github.com/g-despot/sng-demo/tree/master/sng_demo/database) and just copy their contents. They are closely related to the database driver and if you wish to examine them a bit more I suggest you look up the driver documentation [here](https://github.com/memgraph/pymgclient). 
 In the app directory `sng-demo` create the module `db_operations.py`. This is where all the custom database related commands will be located.<br />
-The `sng_demo` directory should look like:
+The `sng_demo` directory should look like this:
  
 ```
 sng_demo
+├── __init__.py
 ├── db_operations.py
 └── database
    ├── __init__.py
@@ -271,6 +276,7 @@ import json
 def clear(db):
   command = "MATCH (node) DETACH DELETE node"
   db.execute_query(command)
+
 def populate_database(db, path):
   file = open(path)
   lines = file.readlines()
@@ -281,16 +287,23 @@ def populate_database(db, path):
 ```
 The method `clear()` deletes any data that might have been left in the database before populating it.<br />
 The method `populate_database()` reads all of the Cypher queries in the specified file and executes them.<br /> 
-In the module `app.py` change the method `index()` to:
+In the module `app.py` change the imports and method `index()` to:
  
 ```python
+from flask import Flask, render_template, request, jsonify, make_response
+from sng_demo.database import Memgraph
+from sng_demo import db_operations
+
+app = Flask(__name__)
+
+
 @app.route('/')
 @app.route('/index')
 def index():
-  db = Memgraph()
-  db_operations.clear(db)
-  db_operations.populate_database(db, "resources/data_small.txt")
-  return render_template('index.html')
+    db = Memgraph()
+    db_operations.clear(db)
+    db_operations.populate_database(db, "resources/data_small.txt")
+    return render_template('index.html')
 ```
 Now every time we refresh our index page the database is cleared and repopulated with new data. While this is not suitable for the production stage, it is highly usefull during development because it will enable us to make changes in the data without having to restart the whole application or working directly on the database.<br />
 If you want to examine the graph before proceeding, I suggest you open Memgraph Lab and run the query `MATCH (n1)-[e:FRIENDS]-(n2) RETURN n1,n2,e;`.<br />
@@ -318,18 +331,18 @@ def get_graph(db):
        data = {"source": e.nodes[0], "target": e.nodes[1]}
        link_objects.append(data)
  
-       n1 = rel['n1']
+       n1 = relationship['n1']
        if not (n1.id in added_nodes):
            data = {"id": n1.id, "name": n1.properties['name']}
            node_objects.append(data)
            added_nodes.append(n1.id)
  
-       n2 = rel['n2']
+       n2 = relationship['n2']
        if not (n2.id in added_nodes):
            data = {"id": n2.id, "name": n2.properties['name']}
            node_objects.append(data)
            added_nodes.append(n2.id)
-   data = {"links": link_objects, "nodes": nodes_objects}
+   data = {"links": link_objects, "nodes": node_objects}
  
    return json.dumps(data)
 ```
@@ -353,7 +366,18 @@ def get_graph():
 ```
 
 This method is responsible for responding to POST requests from the client. It returns the graph data that we fetched from the server in the previous method.<br /><br />
-Now let's do something with this data! Copy the contents of the `index.js` file that you created earlier [from here](https://github.com/g-despot/sng-demo/blob/master/static/js/index.js) and do the same for the `style.css` file located [here](https://github.com/g-despot/sng-demo/blob/master/static/css/style.css). I won't go into much detail about how to use **D3.js** so if you want to find out more I encourage you to visit [their website](https://d3js.org/).<br /><br />
+Now let's do something with this data! Copy the contents for your `index.js` file [from here](https://github.com/g-despot/sng-demo/blob/master/static/js/index.js)
+and the `style.css` file [from here](https://github.com/g-despot/sng-demo/blob/master/static/css/style.css).<br />
+We also need to add the actual SVG graphic to our page so change the `index.html` file to:
+```html
+{% extends 'base.html' %} {% block content %}
+<div class="container">
+    <svg class="border rounded mt-3" width="960" height="600" style="background-color:white"></svg>
+</div>
+<script src="/static/js/index.js" charset="utf-8"></script>
+{% endblock %}
+```
+I won't go into much detail about how to use **D3.js** so if you want to find out more I encourage you to visit [their website](https://d3js.org/).<br /><br />
 In short, we fetch all the nodes and edges from the database and add them to an SVG element. The visual representation of the graph is made by simulating how physical forces act on particles (charge and gravity). You can drag and drop the nodes, hover over them to see the value of their name property, zoom in and out of the graph and move the SVG graphic.<br /><br />
 
 
@@ -366,14 +390,10 @@ In short, we fetch all the nodes and edges from the database and add them to an 
 ## Additional Functionalities
  
  
-Go ahead and copy the file [`query.js`](https://github.com/g-despot/sng-demo/blob/master/static/js/query.js) to `/static/js` and [`query.html`](https://github.com/g-despot/sng-demo/blob/master/templates/query.html) to `/templates`. In your `base.html` file add an additional navbar item:
- 
-```html
-<li class="nav-item">
-   <a class="nav-link" href="{{ url_for('query')}}">Query Database</a>
-</li>
-```
-Also, don't forget to copy the necessary methods from the [db_operations.py](https://github.com/g-despot/sng-demo/blob/master/sng_demo/db_operations.py) module and [app.py](https://github.com/g-despot/sng-demo/blob/master/app.py) module. After you made the necessary changes just open http://localhost:5000/query/ and see the results.
+Go ahead and copy the file [`query.js`](https://github.com/g-despot/sng-demo/blob/master/static/js/query.js) to the directory `static/js` and [`query.html`](https://github.com/g-despot/sng-demo/blob/master/templates/query.html) to the directory `templates`. You can find the updated `base.html` file [here](https://github.com/g-despot/sng-demo/blob/master/templates/base.html).<br />
+Copy the necessary methods from the [db_operations.py](https://github.com/g-despot/sng-demo/blob/master/sng_demo/db_operations.py) module and [app.py](https://github.com/g-despot/sng-demo/blob/master/app.py) module.<br /><br />
+
+After you made the changes just open http://localhost:5000/query/ and see the results.<br />
 This page will make your life easier if you want to debug the data being fetched from the server. It returns all the nodes or edges and shows them in a JSON highlighted format.<br />
 Your current project structure should like this:
 ```
@@ -382,6 +402,7 @@ sng-demo
 │  ├── data_big.py
 │  └── data_small.txt
 ├── sng_demo
+│  ├── __init__.py
 │  ├── db_operations.py
 │  └── database
 │     ├── __init__.py

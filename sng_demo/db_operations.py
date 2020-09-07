@@ -35,11 +35,11 @@ def get_realtionships(db):
 
     relationship_objects = []
     for relationship in relationships:
-        u1 = relationship['n1']
-        u2 = relationship['n2']
+        n1 = relationship['n1']
+        n2 = relationship['n2']
 
-        data = {"userOne": u1.properties['name'],
-                "userTwo": u2.properties['name']}
+        data = {"userOne": n1.properties['name'],
+                "userTwo": n2.properties['name']}
         relationship_objects.append(data)
 
     return json.dumps(relationship_objects)
