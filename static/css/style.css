@@ -1,3 +1,7 @@
+body {
+    background-color: lightgrey;
+}
+
 .links line {
     stroke: #aaa;
 }

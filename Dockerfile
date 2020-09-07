@@ -1,11 +1,6 @@
 FROM python:3.7
 
-# Keeps Python from generating .pyc files in the container
-ENV PYTHONDONTWRITEBYTECODE 1
-
-# Turns off buffering for easier container logging
-ENV PYTHONUNBUFFERED 1
-
+# Install cmake
 RUN apt-get update && \
     apt-get --yes install cmake
 
@@ -37,8 +32,8 @@ RUN poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi
 
 COPY . /app
-
 EXPOSE 5000
+
 ADD start.sh /
 RUN chmod +x /start.sh
 
