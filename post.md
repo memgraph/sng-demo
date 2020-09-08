@@ -393,7 +393,11 @@ In short, we fetch all the nodes and edges from the database and add them to an 
  
 Go ahead and copy the file [`query.js`](https://github.com/g-despot/sng-demo/blob/master/static/js/query.js) to the directory `static/js` and [`query.html`](https://github.com/g-despot/sng-demo/blob/master/templates/query.html) to the directory `templates`. You can find the updated `base.html` file [here](https://github.com/g-despot/sng-demo/blob/master/templates/base.html). Copy the necessary methods from the [db_operations.py](https://github.com/g-despot/sng-demo/blob/master/sng_demo/db_operations.py) module and [app.py](https://github.com/g-despot/sng-demo/blob/master/app.py) module.<br />
 After you made the changes, just open http://localhost:5000/query/ and see the results.<br />
-This page will make your life easier if you want to debug the data being fetched from the server. It returns all the nodes or edges and shows them in a JSON highlighted format.<br />
+This page will make your life easier if you want to debug the data being fetched from the server. It returns all the nodes or edges and shows them in a JSON highlighted format.<br /><br />
+<p align="center">
+    <img src="https://github.com/g-despot/images/blob/master/sng_query.png?raw=true" alt="Data Model" width="600" />
+<p/><br />
+
 Your current project structure should like this:
 ```
 sng-demo
@@ -426,7 +430,6 @@ sng-demo
 └── start.sh
 ```
 <br />
-
 
 ## Conclusion
 
