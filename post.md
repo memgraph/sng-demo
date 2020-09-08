@@ -5,7 +5,7 @@
 When you think about a web application, a graph database doesn’t usually spring to mind. Instead, most people just take the familiar route of using an SQL database to store information. While this is perfectly acceptable for most use cases there are sometimes those that would see tremendous benefits by using a graph database.
 In this tutorial, I will show you how to make a basic web application using Flask that stores all of its information in a graph database. To be more precise we are using **Memgraph DB**, an in-memory database that can easily handle a lot of information and perform read/write instructions quite quickly.<br /><br />
 Our use case is a **Social Network Graph** (in the code referred to as **SNG** for convenience) representing users and the connections between them. Usually, such a graph would contain millions of relationships and the algorithms that are performed on them don’t do well with data being stored in relational databases.<br /><br />
-In this tutorial, I will show you step by step how to build a simple Python web application from the bottom up so you get a basic understanding of the technologies that are used. You can also find all of the code [here](https://github.com/g-despot/sng-demo) if you don't want to work on it as you go through the tutorial.
+In this tutorial, I will show you step by step how to build a simple Python web application from the bottom up so you get a basic understanding of the technologies that are used. You can also find all of the code [here](https://github.com/g-despot/sng-demo) if you don't want to work on it as you go through the tutorial. If at any point in this tutorial you have a qustion or something is not working for you, feel free to post on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb`.
  
 <br /><br />
 <p align="center">
@@ -19,8 +19,9 @@ Because we are building a complete web application there is a number of tools th
 * **[Poetry](https://python-poetry.org/docs/)**: a tool for dependency management and packaging in Python. It allows you to declare the libraries your project depends on and it will manage (install/update) them for you.
 * **[Flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/)**: a very powerful web framework that provides you with tools, libraries and technologies used in web development. A Flask application can be as small as a single web page or as complex as a management interface.
 * **[Docker and Compose](https://docs.docker.com/get-docker/)**: an open platform for developing, shipping, and running applications. It enables us to separate our application from our infrastructure (host machine). If you are installing Docker on Windows, Compose will be already included. For Linux and macOS visit [this site](https://docs.docker.com/compose/install/).
-* **[Memgraph DB](https://docs.memgraph.com/memgraph/quick-start)**: a native fully distributed in-memory graph database built to handle real-time use-cases at enterprise scale. Follow the **Docker Installation** instructions on the Quick Start page. While it's completely optional, I encourage you to also install **[Memgraph Lab](https://memgraph.com/product/lab)** so you can execute Cypher queries on the database directly and see visualized results.
-<br /><br />
+* **[Memgraph DB](https://docs.memgraph.com/memgraph/quick-start)**: a native fully distributed in-memory graph database built to handle real-time use-cases at enterprise scale. Follow the **Docker Installation** instructions on the Quick Start page. While it's completely optional, I encourage you to also install **[Memgraph Lab](https://memgraph.com/product/lab)** so you can execute **openCypher** queries on the database directly and see visualized results.
+
+<br />
 
 ## Creating the Project Structure and Handling Dependencies
 
@@ -39,7 +40,7 @@ sng-demo
 ├── pyproject.toml
 ├── README.rst
 ├── sng_demo
-│   └── __init__.py
+│  └── __init__.py
 └── tests
    ├── __init__.py
    └── test_poetry_demo.py
@@ -53,7 +54,7 @@ Now we need to add the dependencies for our project. Given that we are going to 
 ## Dockerizing an Application
  
  
-In the root directory of the project create two files, `Dockerfile` and `docker-compose.yml`. At the beginning of the `Dockerfile`, we specify the Python version and instruct the container to install **CMake**, **poetry**, **mgclient** and **pymgclient**. Poetry is necessary to manage our dependencies inside the container while CMake and mgclient are required for pymgclient, the Python driver for Memgraph DB.<br />
+In the root directory of the project create two files, `Dockerfile` and `docker-compose.yml`. At the beginning of the `Dockerfile`, we specify the Python version and instruct the container to install **CMake**, **poetry**, **mgclient** and **pymgclient**. Poetry is necessary to manage our dependencies inside the container while CMake and mgclient are required for pymgclient, the Python driver for **Memgraph DB**.<br />
 You don’t have to focus too much on this part just copy the code to your `Dockerfile`:
 ```dockerfile
 FROM python:3.7
@@ -124,7 +125,7 @@ services:
     depends_on:
       - memgraph
 ```
-When it comes to the `ports` key, there is an important distinction between the **HOST_PORT** and the **CONTAINER_PORT**. The first number in the key is the **HOST_PORT** and it can be used to connect from your host machine to the service (for example with Memgraph Lab). The second number specifies the **CONTAINER_PORT** which is used for service-to-service communication. More precisely, our service `sng_db` can use this port to access the service `memgraph` and connect to the database.
+When it comes to the `ports` key, there is an important distinction between the **HOST_PORT** and the **CONTAINER_PORT**. The first number in the key is the **HOST_PORT** and it can be used to connect from your host machine to the service (for example with **Memgraph Lab**). The second number specifies the **CONTAINER_PORT** which is used for service-to-service communication. More precisely, our service `sng_db` can use this port to access the service `memgraph` and connect to the database.
  
 The `environment` key contains `MG_HOST` and `MG_PORT` which respresent environment variables in the service’s container. They store the `memgraph` service address and port which are needed to establish a database connection.
 The `depends_on` key is used to start services in dependency order because we need the database to start before the web application.
@@ -266,7 +267,7 @@ There is only one node with the label `User` and each `User` has two properties,
 <img src="https://github.com/g-despot/images/blob/master/user.png?raw=true" alt="Data Model" width="250"/>
 <p/>
  
-There are several methods to populate our database ([more on that here](https://docs.memgraph.com/memgraph/how-to-guides-overview/import-data)) but we will be doing it manually by executing Cypher queries so you can get a better understanding of how to communicate with the database. You will find all the necessary queries to populate the database in the files [`data_big.txt`](https://github.com/g-despot/sng-demo/blob/master/resources/data_big.txt) and [`data_small.txt`](https://github.com/g-despot/sng-demo/blob/master/resources/data_small.txt). The former just has a larger dataset than the latter.<br />
+There are several methods to populate our database ([more on that here](https://docs.memgraph.com/memgraph/how-to-guides-overview/import-data)) but we will be doing it manually by executing **openCypher** queries so you can get a better understanding of how to communicate with the database. You will find all the necessary queries to populate the database in the files [`data_big.txt`](https://github.com/g-despot/sng-demo/blob/master/resources/data_big.txt) and [`data_small.txt`](https://github.com/g-despot/sng-demo/blob/master/resources/data_small.txt). The former just has a larger dataset than the latter.<br />
 In the project root directory create a folder called `resources` and place the files in it. Now you can add an import method to your web application.<br />
 In the module `db_operations.py` add the following import and method:
  
@@ -286,7 +287,7 @@ def populate_database(db, path):
           db.execute_query(line)
 ```
 The method `clear()` deletes any data that might have been left in the database before populating it.<br />
-The method `populate_database()` reads all of the Cypher queries in the specified file and executes them.<br /> 
+The method `populate_database()` reads all of the **openCypher** queries in the specified file and executes them.<br /> 
 In the module `app.py` change the imports and method `index()` to:
  
 ```python
@@ -306,7 +307,7 @@ def index():
     return render_template('index.html')
 ```
 Now every time we refresh our index page the database is cleared and repopulated with new data. While this is not suitable for the production stage, it is highly usefull during development because it will enable us to make changes in the data without having to restart the whole application or working directly on the database.<br />
-If you want to examine the graph before proceeding, I suggest you open Memgraph Lab and run the query `MATCH (n1)-[e:FRIENDS]-(n2) RETURN n1,n2,e;`.<br />
+If you want to examine the graph before proceeding, I suggest you open **Memgraph Lab** and run the query `MATCH (n1)-[e:FRIENDS]-(n2) RETURN n1,n2,e;`.<br />
 The result should be:
 
 <br />
@@ -347,7 +348,7 @@ def get_graph(db):
    return json.dumps(data)
 ```
  
-First, we need to execute the Cypher query `MATCH (n1)-[e:FRIENDS]-(n2) RETURN n1,n2,e;` and return its results from the database. These results will contain all the edges in the graph as well as all the nodes that are connected to those edges. Nodes that don't have connections will not be returned and that's ok for now.<br /><br />
+First, we need to execute the **openCypher** query `MATCH (n1)-[e:FRIENDS]-(n2) RETURN n1,n2,e;` and return its results from the database. These results will contain all the edges in the graph as well as all the nodes that are connected to those edges. Nodes that don't have connections will not be returned and that's ok for now.<br /><br />
 The results (the object `relationships`) are in the form of a generator which we can iterate over and access its contents by using the node/edge names specified in our initial query (`n1`,`n2` and `e`).<br />
 We also need to check if a node has already been appended to the `node_objects` list because multiple edges can contain (point to or from) the same node. All of the objects are stored in key-value pairs suitable for later JSON conversion.<br />
 The final result is a JSON object containing: 
@@ -390,10 +391,8 @@ In short, we fetch all the nodes and edges from the database and add them to an 
 ## Additional Functionalities
  
  
-Go ahead and copy the file [`query.js`](https://github.com/g-despot/sng-demo/blob/master/static/js/query.js) to the directory `static/js` and [`query.html`](https://github.com/g-despot/sng-demo/blob/master/templates/query.html) to the directory `templates`. You can find the updated `base.html` file [here](https://github.com/g-despot/sng-demo/blob/master/templates/base.html).<br />
-Copy the necessary methods from the [db_operations.py](https://github.com/g-despot/sng-demo/blob/master/sng_demo/db_operations.py) module and [app.py](https://github.com/g-despot/sng-demo/blob/master/app.py) module.<br /><br />
-
-After you made the changes just open http://localhost:5000/query/ and see the results.<br />
+Go ahead and copy the file [`query.js`](https://github.com/g-despot/sng-demo/blob/master/static/js/query.js) to the directory `static/js` and [`query.html`](https://github.com/g-despot/sng-demo/blob/master/templates/query.html) to the directory `templates`. You can find the updated `base.html` file [here](https://github.com/g-despot/sng-demo/blob/master/templates/base.html). Copy the necessary methods from the [db_operations.py](https://github.com/g-despot/sng-demo/blob/master/sng_demo/db_operations.py) module and [app.py](https://github.com/g-despot/sng-demo/blob/master/app.py) module.<br />
+After you made the changes, just open http://localhost:5000/query/ and see the results.<br />
 This page will make your life easier if you want to debug the data being fetched from the server. It returns all the nodes or edges and shows them in a JSON highlighted format.<br />
 Your current project structure should like this:
 ```
@@ -432,5 +431,8 @@ sng-demo
 ## Conclusion
 
 
-Even though graph databases have been around for a long time they are still not a mainstream tool in software development. A lot of data in the modern world is better suited for graph representation and graph databases offer built-in algorithms which are highly efficient with such datasets in comparison to the standard relational paradigm.<br />
-I hope that this tutorial can demonstrate how easy it is to use graph databases with other techonoligies.
+Even though graph databases have been around for a long time, they are still not considered a mainstream tool in software development. **Relational database-management systems** model data as a set of predetermined structures. Complex joins and self-joins are necessery when the dataset becomes too inter-related. Modern datasets require technically complex queries which are often very inefficient in real-time scenarios.<br /><br />
+
+**Graph databases** offer powerful data modeling and analysis capabilities for many real-world problems such as social networks, business relationships, dependencies, shipping, logistics... and they have been adopted by many of the worlds leading tech companies. With this tutorial I hope to shed some light on how easy it is to integrate a graph database in your development process and I encourage you to try it out yourself.
+
+As I said at the beginning, feel free to ask us any questions about this tutorial or Memgraph in general on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb` or on our official [forum](https://discourse.memgraph.com/). **Good luck with your coding!**
