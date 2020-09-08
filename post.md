@@ -432,7 +432,9 @@ sng-demo
 
 
 Even though graph databases have been around for a long time, they are still not considered a mainstream tool in software development. **Relational database-management systems** model data as a set of predetermined structures. Complex joins and self-joins are necessery when the dataset becomes too inter-related. Modern datasets require technically complex queries which are often very inefficient in real-time scenarios.<br /><br />
+**Graph databases** offer powerful data modeling and analysis capabilities for many real-world problems such as social networks, business relationships, dependencies, shipping, logistics... and they have been adopted by many of the worlds leading tech companies. With this tutorial I hope to shed some light on how easy it is to integrate a graph database in your development process and I encourage you to try it out yourself.<br /><br />
+As I said at the beginning, feel free to ask us any questions about this tutorial or Memgraph in general on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb` or on our official [forum](https://discourse.memgraph.com/). **Good luck with your coding!**<br /><br />
 
-**Graph databases** offer powerful data modeling and analysis capabilities for many real-world problems such as social networks, business relationships, dependencies, shipping, logistics... and they have been adopted by many of the worlds leading tech companies. With this tutorial I hope to shed some light on how easy it is to integrate a graph database in your development process and I encourage you to try it out yourself.
-
-As I said at the beginning, feel free to ask us any questions about this tutorial or Memgraph in general on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb` or on our official [forum](https://discourse.memgraph.com/). **Good luck with your coding!**
+<p align="center">
+   <img src="https://github.com/g-despot/images/blob/master/sng_demo_screenshot.png?raw=true" alt="Data Model" width="900"/>
+<p/>
