@@ -5,7 +5,7 @@
 When you think about a web application, a graph database doesn’t usually spring to mind. Instead, most people just take the familiar route of using an SQL database to store information. While this is perfectly acceptable for most use cases there are sometimes those that would see tremendous benefits by using a graph database.
 In this tutorial, I will show you how to make a basic web application using Flask that stores all of its information in a graph database. To be more precise we are using **Memgraph DB**, an in-memory database that can easily handle a lot of information and perform read/write instructions quite quickly.<br /><br />
 Our use case is a **Social Network Graph** (in the code referred to as **SNG** for convenience) representing users and the connections between them. Usually, such a graph would contain millions of relationships and the algorithms that are performed on them don’t do well with data being stored in relational databases.<br /><br />
-In this tutorial, I will show you step by step how to build a simple Python web application from the bottom up so you get a basic understanding of the technologies that are used. You can also find all of the code [here](https://github.com/g-despot/sng-demo) if you don't want to work on it as you go through the tutorial. If at any point in this tutorial you have a qustion or something is not working for you, feel free to post on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb`.
+In this tutorial, I will show you step by step how to build a simple Python web application from the bottom up so you get a basic understanding of the technologies that are used. You can also find all of the code [here](https://github.com/g-despot/sng-demo) if you don't want to work on it as you go through the tutorial. If at any point in this tutorial you have a question or something is not working for you, feel free to post on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb`.
  
 <br /><br />
 <p align="center">
@@ -48,7 +48,7 @@ sng-demo
  
 In this tutorial, we won’t use the testing functionalities so go on ahead and delete the directory `tests` as well as the file `README.rst`.
  
-Now we need to add the dependencies for our project. Given that we are going to run the app inside a Docker container we don't need the dependencies installed locally, only inside the container. Copy the files [`project.toml`](https://github.com/g-despot/sng-demo/blob/master/pyproject.toml) and [`poetry.lock`](https://github.com/g-despot/sng-demo/blob/master/poetry.lock) and place them in the root directory of the project. The only other thing we need to do about dependency management is tell Docker how to run Poetry on startup so it can install/update all the necessary dependencies inside the container.<br /><br />
+Now we need to add the dependencies for our project. Given that we are going to run the app inside a Docker container we don't need the dependencies installed locally, only inside the container. Copy the files [`project.toml`](https://github.com/g-despot/sng-demo/blob/master/pyproject.toml) and [`poetry.lock`](https://github.com/g-despot/sng-demo/blob/master/poetry.lock) and place them in the root directory of the project. The only other thing we need to do about dependency management is to tell Docker how to run Poetry on startup so it can install/update all the necessary dependencies inside the container.<br /><br />
  
  
 ## Dockerizing an Application
@@ -127,12 +127,12 @@ services:
 ```
 When it comes to the `ports` key, there is an important distinction between the **HOST_PORT** and the **CONTAINER_PORT**. The first number in the key is the **HOST_PORT** and it can be used to connect from your host machine to the service (for example with **Memgraph Lab**). The second number specifies the **CONTAINER_PORT** which is used for service-to-service communication. More precisely, our service `sng_db` can use this port to access the service `memgraph` and connect to the database.
  
-The `environment` key contains `MG_HOST` and `MG_PORT` which respresent environment variables in the service’s container. They store the `memgraph` service address and port which are needed to establish a database connection.
+The `environment` key contains `MG_HOST` and `MG_PORT` which represent environment variables in the service’s container. They store the `memgraph` service address and port which are needed to establish a database connection.
 The `depends_on` key is used to start services in dependency order because we need the database to start before the web application.
  
 The `build` key allows us to tell Compose where to find the build instructions as well as the files and/or folders used during the build process. By using the `volumes` key, we bypass the need to constantly restart our image to load new changes to it from the host machine.
  
-Finally, we have a dockerized project that utilizes Poetry! This aproach is great for development because it enables us to run our project on completely different operating systems and environments without having to worry about compatibility issues.
+Finally, we have a dockerized project that utilizes Poetry! This approach is great for development because it enables us to run our project on completely different operating systems and environments without having to worry about compatibility issues.
 <br /><br />
 
 
@@ -178,7 +178,7 @@ In the project root directory execute:
 ```shell
 docker-compose build
 ```
-The first build will take some time because Docker has to donwload and install a lot of dependencies.<br /> 
+The first build will take some time because Docker has to download and install a lot of dependencies.<br /> 
 After it finishes run:
 ```shell
 docker-compose up
@@ -434,8 +434,8 @@ sng-demo
 ## Conclusion
 
 
-Even though graph databases have been around for a long time, they are still not considered a mainstream tool in software development. **Relational database-management systems** model data as a set of predetermined structures. Complex joins and self-joins are necessery when the dataset becomes too inter-related. Modern datasets require technically complex queries which are often very inefficient in real-time scenarios.<br /><br />
-**Graph databases** offer powerful data modeling and analysis capabilities for many real-world problems such as social networks, business relationships, dependencies, shipping, logistics... and they have been adopted by many of the worlds leading tech companies. With this tutorial I hope to shed some light on how easy it is to integrate a graph database in your development process and I encourage you to try it out yourself.<br /><br />
+Even though graph databases have been around for a long time, they are still not considered a mainstream tool in software development. **Relational database-management systems** model data as a set of predetermined structures. Complex joins and self-joins are necessary when the dataset becomes too inter-related. Modern datasets require technically complex queries which are often very inefficient in real-time scenarios.<br /><br />
+**Graph databases** offer powerful data modelling and analysis capabilities for many real-world problems such as social networks, business relationships, dependencies, shipping, logistics... and they have been adopted by many of the worlds leading tech companies. With this tutorial, I hope to shed some light on how easy it is to integrate a graph database in your development process and I encourage you to try it out yourself.<br /><br />
 As I said at the beginning, feel free to ask us any questions about this tutorial or Memgraph in general on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb` or on our official [forum](https://discourse.memgraph.com/). **Good luck with your coding!**<br /><br />
 
 <p align="center">
