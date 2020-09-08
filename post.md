@@ -306,7 +306,7 @@ def index():
     db_operations.populate_database(db, "resources/data_small.txt")
     return render_template('index.html')
 ```
-Now every time we refresh our index page the database is cleared and repopulated with new data. While this is not suitable for the production stage, it is highly usefull during development because it will enable us to make changes in the data without having to restart the whole application or working directly on the database.<br />
+Now every time we refresh our index page the database is cleared and repopulated with new data. While this is not suitable for the production stage, it is highly useful during development because it will enable us to make changes in the data without having to restart the whole application or working directly on the database.<br />
 If you want to examine the graph before proceeding, I suggest you open **Memgraph Lab** and run the query `MATCH (n1)-[e:FRIENDS]-(n2) RETURN n1,n2,e;`.<br />
 The result should be:
 
