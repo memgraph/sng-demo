@@ -1,4 +1,10 @@
-# How to Build a Social Network Graph Web Application
+# How to Visualize a Social Network in Python with a Graph Database: Flask + Docker + D3.js
+<br /><br />
+<p align="center">
+   <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Social_Network_Analysis_Visualization.png" alt="Data Model" width="600"/>
+<p/>
+
+
 ## Introduction
  
  
@@ -7,10 +13,11 @@ In this tutorial, I will show you how to make a basic web application using Flas
 Our use case is a **Social Network Graph** (in the code referred to as **SNG** for convenience) representing users and the connections between them. Usually, such a graph would contain millions of relationships and the algorithms that are performed on them don’t do well with data being stored in relational databases.<br /><br />
 In this tutorial, I will show you step by step how to build a simple Python web application from the bottom up so you get a basic understanding of the technologies that are used. You can also find all of the code [here](https://github.com/g-despot/sng-demo) if you don't want to work on it as you go through the tutorial. If at any point in this tutorial you have a question or something is not working for you, feel free to post on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb`.
  
-<br /><br />
+<br />
 <p align="center">
-   <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Social_Network_Analysis_Visualization.png" alt="Data Model" width="600"/>
+   <img src="https://github.com/g-despot/images/blob/master/sng_demo_screenshot.png?raw=true" alt="Data Model" width="900"/>
 <p/>
+<br />
 
 ## Prerequisites
  
@@ -438,6 +445,3 @@ Even though graph databases have been around for a long time, they are still not
 **Graph databases** offer powerful data modelling and analysis capabilities for many real-world problems such as social networks, business relationships, dependencies, shipping, logistics... and they have been adopted by many of the worlds leading tech companies. With this tutorial, I hope to shed some light on how easy it is to integrate a graph database in your development process and I encourage you to try it out yourself.<br /><br />
 As I said at the beginning, feel free to ask us any questions about this tutorial or Memgraph in general on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb` or on our official [forum](https://discourse.memgraph.com/). **Good luck with your coding!**<br /><br />
 
-<p align="center">
-   <img src="https://github.com/g-despot/images/blob/master/sng_demo_screenshot.png?raw=true" alt="Data Model" width="900"/>
-<p/>
