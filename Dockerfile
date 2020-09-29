@@ -13,6 +13,7 @@ ENV PATH="${PATH}:/root/.poetry/bin"
 RUN apt-get install -y git cmake make gcc g++ libssl-dev && \
     git clone https://github.com/memgraph/mgclient.git /mgclient && \
     cd mgclient && \
+    git checkout 5ae69ea4774e9b525a2be0c9fc25fb83490f13bb && \
     mkdir build && \
     cd build && \
     cmake .. && \
