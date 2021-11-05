@@ -2,7 +2,7 @@ FROM python:3.7-slim-bullseye
 
 # Install poetry
 RUN pip install -U pip \
-    && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+    && python -c "import requests; res=requests.get('https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py'); print(res.content)" | python
 ENV PATH="${PATH}:/root/.poetry/bin"
 
 # Install mgclient
