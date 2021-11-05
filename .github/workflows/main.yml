@@ -10,6 +10,6 @@ jobs:
     - name: Build docker image and run a smoke test
       id: build_docker_image
       run: |
-        docker-compose up --build
+        docker-compose up --build --detach
         sleep 10
         docker-compose stop
