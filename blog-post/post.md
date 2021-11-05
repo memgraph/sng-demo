@@ -64,32 +64,22 @@ Now we need to add the dependencies for our project. Given that we are going to 
 In the root directory of the project create two files, `Dockerfile` and `docker-compose.yml`. At the beginning of the `Dockerfile`, we specify the Python version and instruct the container to install **CMake**, **poetry**, **mgclient** and **pymgclient**. Poetry is necessary to manage our dependencies inside the container while CMake and mgclient are required for pymgclient, the Python driver for **Memgraph DB**.<br />
 You don’t have to focus too much on this part just copy the code to your `Dockerfile`:
 ```dockerfile
-FROM python:3.7
+FROM python:3.7-slim-bullseye
 
-#Install CMake
+# Install pymgclient
 RUN apt-get update && \
-  apt-get --yes install cmake
+    apt-get install -y git cmake make gcc g++ libssl-dev && \
+    git clone --recursive https://github.com/memgraph/pymgclient /pymgclient && \
+    cd pymgclient && \
+    git checkout v1.1.0 && \
+    python3 setup.py install && \
+    python3 -c "import mgclient"
 
-#Install poetry
-RUN pip install -U pip \
-  && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+# Install poetry
+RUN python3 -m pip install -U pip \
+ && python3 -c "import urllib.request; print(urllib.request.urlopen('https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py').read().decode('utf-8'))" | python3
+
 ENV PATH="${PATH}:/root/.poetry/bin"
-
-#Install mgclient
-RUN apt-get install -y git cmake make gcc g++ libssl-dev && \
-  git clone https://github.com/memgraph/mgclient.git /mgclient && \
-  cd mgclient && \
-  mkdir build && \
-  cd build && \
-  cmake .. && \
-  make && \
-  make install
-
-#Install pymgclient
-RUN git clone https://github.com/memgraph/pymgclient /pymgclient && \
-  cd pymgclient && \
-  python3 setup.py build && \
-  python3 setup.py install
 ```
 Next, we define the working directory with:
 ```dockerfile
@@ -117,7 +107,7 @@ If you followed the instructions on [how to setup Memgraph DB with Docker](https
 version: '3'
 services:
   memgraph:
-    image: "memgraph"
+    image: memgraph/memgraph
     ports:
       - "7687:7687"
   sng_demo:
