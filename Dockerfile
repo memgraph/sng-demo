@@ -5,6 +5,7 @@ RUN apt-get update && \
     apt-get install -y git cmake make gcc g++ libssl-dev && \
     git clone --recursive https://github.com/memgraph/pymgclient /pymgclient && \
     cd pymgclient && \
+    git checkout v1.1.0 && \
     python3 setup.py install && \
     python3 -c "import mgclient"
 
