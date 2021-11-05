@@ -35,5 +35,5 @@ def get_users():
 def get_relationships():
     db = Memgraph()
     response = make_response(
-        jsonify(db_operations.get_realtionships(db)), 200)
+        jsonify(db_operations.get_relationships(db)), 200)
     return response
