@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, render_template, jsonify, make_response
 from sng_demo.database import Memgraph
 from sng_demo import db_operations
 
@@ -35,5 +35,5 @@ def get_users():
 def get_relationships():
     db = Memgraph()
     response = make_response(
-        jsonify(db_operations.get_realtionships(db)), 200)
+        jsonify(db_operations.get_relationships(db)), 200)
     return response

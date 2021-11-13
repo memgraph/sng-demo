@@ -1,4 +1,3 @@
-from pathlib import Path
 import json
 
 
@@ -29,7 +28,7 @@ def get_users(db):
     return json.dumps(user_objects)
 
 
-def get_realtionships(db):
+def get_relationships(db):
     command = "MATCH (n1)-[e:FRIENDS]-(n2) RETURN n1,n2,e;"
     relationships = db.execute_and_fetch(command)
 

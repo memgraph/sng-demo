@@ -1,7 +1,7 @@
 version: '3'
 services:
   memgraph:
-    image: "memgraph"
+    image: memgraph/memgraph
     ports:
       - "7687:7687"
   sng_demo:

@@ -6,13 +6,13 @@
 
 
 ## Introduction
- 
- 
+
+
 When you think about a web application, a graph database doesn’t usually spring to mind. Instead, most people just take the familiar route of using an SQL database to store information. While this is perfectly acceptable for most use cases there are sometimes those that would see tremendous benefits by using a graph database.
 In this tutorial, I will show you how to make a basic web application using Flask that stores all of its information in a graph database. To be more precise we are using **Memgraph DB**, an in-memory database that can easily handle a lot of information and perform read/write instructions quite quickly.<br /><br />
 Our use case is a **Social Network Graph** (in the code referred to as **SNG** for convenience) representing users and the connections between them. Usually, such a graph would contain millions of relationships and the algorithms that are performed on them don’t do well with data being stored in relational databases.<br /><br />
 In this tutorial, I will show you step by step how to build a simple Python web application from the bottom up so you get a basic understanding of the technologies that are used. You can also find all of the code [here](https://github.com/g-despot/sng-demo) if you don't want to work on it as you go through the tutorial. If at any point in this tutorial you have a question or something is not working for you, feel free to post on [StackOverflow](https://stackoverflow.com/questions/tagged/memgraphdb) with the tag `memgraphdb`.
- 
+
 <br />
 <p align="center">
    <img src="https://github.com/g-despot/images/blob/master/sng_demo_screenshot.png?raw=true" alt="Data Model" width="900"/>
@@ -20,8 +20,8 @@ In this tutorial, I will show you step by step how to build a simple Python web 
 <br />
 
 ## Prerequisites
- 
- 
+
+
 Because we are building a complete web application there is a number of tools that you will need to install before we begin:
 * **[Poetry](https://python-poetry.org/docs/)**: a tool for dependency management and packaging in Python. It allows you to declare the libraries your project depends on and it will manage (install/update) them for you.
 * **[Flask](https://flask.palletsprojects.com/en/1.1.x/quickstart/)**: a very powerful web framework that provides you with tools, libraries and technologies used in web development. A Flask application can be as small as a single web page or as complex as a management interface.
@@ -35,11 +35,11 @@ Because we are building a complete web application there is a number of tools th
 
 Sometimes standard packaging systems and dependency management in Python can be confusing for beginners so we decided to use Poetry.<br />
 To start building our project structure choose a working directory and run:
- 
+
 ```
 poetry new sng-demo
 ```
- 
+
 Now you should have a directory with the following content:
 
 ```
@@ -52,51 +52,41 @@ sng-demo
    ├── __init__.py
    └── test_poetry_demo.py
 ```
- 
+
 In this tutorial, we won’t use the testing functionalities so go on ahead and delete the directory `tests` as well as the file `README.rst`.
- 
+
 Now we need to add the dependencies for our project. Given that we are going to run the app inside a Docker container we don't need the dependencies installed locally, only inside the container. Copy the files [`project.toml`](https://github.com/g-despot/sng-demo/blob/master/pyproject.toml) and [`poetry.lock`](https://github.com/g-despot/sng-demo/blob/master/poetry.lock) and place them in the root directory of the project. The only other thing we need to do about dependency management is to tell Docker how to run Poetry on startup so it can install/update all the necessary dependencies inside the container.<br /><br />
- 
- 
+
+
 ## Dockerizing an Application
- 
- 
+
+
 In the root directory of the project create two files, `Dockerfile` and `docker-compose.yml`. At the beginning of the `Dockerfile`, we specify the Python version and instruct the container to install **CMake**, **poetry**, **mgclient** and **pymgclient**. Poetry is necessary to manage our dependencies inside the container while CMake and mgclient are required for pymgclient, the Python driver for **Memgraph DB**.<br />
 You don’t have to focus too much on this part just copy the code to your `Dockerfile`:
 ```dockerfile
-FROM python:3.7
+FROM python:3.7-slim-bullseye
 
-#Install CMake
+# Install pymgclient
 RUN apt-get update && \
-  apt-get --yes install cmake
+    apt-get install -y git cmake make gcc g++ libssl-dev && \
+    git clone --recursive https://github.com/memgraph/pymgclient /pymgclient && \
+    cd pymgclient && \
+    git checkout v1.1.0 && \
+    python3 setup.py install && \
+    python3 -c "import mgclient"
 
-#Install poetry
-RUN pip install -U pip \
-  && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+# Install poetry
+RUN python3 -m pip install -U pip \
+ && python3 -c "import urllib.request; print(urllib.request.urlopen('https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py').read().decode('utf-8'))" | python3
+
 ENV PATH="${PATH}:/root/.poetry/bin"
-
-#Install mgclient
-RUN apt-get install -y git cmake make gcc g++ libssl-dev && \
-  git clone https://github.com/memgraph/mgclient.git /mgclient && \
-  cd mgclient && \
-  mkdir build && \
-  cd build && \
-  cmake .. && \
-  make && \
-  make install
-
-#Install pymgclient
-RUN git clone https://github.com/memgraph/pymgclient /pymgclient && \
-  cd pymgclient && \
-  python3 setup.py build && \
-  python3 setup.py install
 ```
 Next, we define the working directory with:
 ```dockerfile
 WORKDIR /app
 COPY poetry.lock pyproject.toml /app/
 ```
-The second command will enable us to cache the project requirements and only reinstall them when `pyproject.toml` or `poetry.lock` are changed. 
+The second command will enable us to cache the project requirements and only reinstall them when `pyproject.toml` or `poetry.lock` are changed.
 ```dockerfile
 RUN poetry config virtualenvs.create false && \
   poetry install --no-interaction --no-ansi
@@ -109,15 +99,15 @@ EXPOSE 5000
 ENTRYPOINT [ "poetry", "run" ]
 ```
 This is where we essentially create all the directories and files inside of our container. The `EXPOSE` command informs Docker that the container listens on the specified network port at runtime.<br />
- 
+
 Next, we need to create a `docker-compose.yml` file. **Compose** is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration. For our project, we need two services. One is the web application (`sng_demo`) and the other a database instance (`memgraph`).<br />
- 
+
 If you followed the instructions on [how to setup Memgraph DB with Docker](https://docs.memgraph.com/memgraph/quick-start) correctly you only need to add the following code to your `docker-compose.yml` file to run the container:
 ```yaml
 version: '3'
 services:
   memgraph:
-    image: "memgraph"
+    image: memgraph/memgraph
     ports:
       - "7687:7687"
   sng_demo:
@@ -133,27 +123,27 @@ services:
       - memgraph
 ```
 When it comes to the `ports` key, there is an important distinction between the **HOST_PORT** and the **CONTAINER_PORT**. The first number in the key is the **HOST_PORT** and it can be used to connect from your host machine to the service (for example with **Memgraph Lab**). The second number specifies the **CONTAINER_PORT** which is used for service-to-service communication. More precisely, our service `sng_db` can use this port to access the service `memgraph` and connect to the database.
- 
+
 The `environment` key contains `MG_HOST` and `MG_PORT` which represent environment variables in the service’s container. They store the `memgraph` service address and port which are needed to establish a database connection.
 The `depends_on` key is used to start services in dependency order because we need the database to start before the web application.
- 
+
 The `build` key allows us to tell Compose where to find the build instructions as well as the files and/or folders used during the build process. By using the `volumes` key, we bypass the need to constantly restart our image to load new changes to it from the host machine.
- 
+
 Finally, we have a dockerized project that utilizes Poetry! This approach is great for development because it enables us to run our project on completely different operating systems and environments without having to worry about compatibility issues.
 <br /><br />
 
 
 ## Web Development with Flask
- 
- 
-Flask is very simple to use so why not create a **Hello World!** page to try out our Docker+Poetry setup.<br /> 
+
+
+Flask is very simple to use so why not create a **Hello World!** page to try out our Docker+Poetry setup.<br />
 In the project root directory create a file called `app.py` with the following code:
 ```python
 from flask import Flask
- 
+
 app = Flask(__name__)
- 
- 
+
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -168,24 +158,24 @@ export FLASK_APP=app.py
 export FLASK_ENV=development
 flask run --host 0.0.0.0
 ```
-Setting `FLASK_ENV` to `development` will enable the debug mode. This makes Flask use an interactive debugger and reloader.<br /> 
-Setting `FLASK_APP` to `app.py` specifies how to start the application.<br /> 
+Setting `FLASK_ENV` to `development` will enable the debug mode. This makes Flask use an interactive debugger and reloader.<br />
+Setting `FLASK_APP` to `app.py` specifies how to start the application.<br />
 We need to tell Docker when and how to run this script so put the following code in your `Dockerfile` after the line `EXPOSE 5000` :
 ```dockerfile
 ADD start.sh /
 RUN chmod +x /start.sh
 ```
-The command `chmod +x` makes the script executable by setting the right permission.<br /> 
+The command `chmod +x` makes the script executable by setting the right permission.<br />
 To execute the script, add the following command after the line `ENTRYPOINT [ "poetry", "run" ]`:
 ```dockerfile
 CMD ["/start.sh"]
 ```
-That’s it! Our first web page is ready so let’s start our app to make sure we don’t have any errors.<br /> 
+That’s it! Our first web page is ready so let’s start our app to make sure we don’t have any errors.<br />
 In the project root directory execute:
 ```shell
 docker-compose build
 ```
-The first build will take some time because Docker has to download and install a lot of dependencies.<br /> 
+The first build will take some time because Docker has to download and install a lot of dependencies.<br />
 After it finishes run:
 ```shell
 docker-compose up
@@ -249,14 +239,14 @@ sng-demo
 ```
 <br />
 
- 
-## The Data Model and Database Connection
- 
 
-In the app directory `sng-demo` create a folder called `database`. This folder will contain all of the modules that we need to communicate with the database. You can find them [here](https://github.com/g-despot/sng-demo/tree/master/sng_demo/database) and just copy their contents. They are closely related to the database driver and if you wish to examine them a bit more I suggest you look up the driver documentation [here](https://github.com/memgraph/pymgclient). 
+## The Data Model and Database Connection
+
+
+In the app directory `sng-demo` create a folder called `database`. This folder will contain all of the modules that we need to communicate with the database. You can find them [here](https://github.com/g-despot/sng-demo/tree/master/sng_demo/database) and just copy their contents. They are closely related to the database driver and if you wish to examine them a bit more I suggest you look up the driver documentation [here](https://github.com/memgraph/pymgclient).
 In the app directory `sng-demo` create the module `db_operations.py`. This is where all the custom database related commands will be located.<br />
 The `sng_demo` directory should look like this:
- 
+
 ```
 sng_demo
 ├── __init__.py
@@ -266,18 +256,18 @@ sng_demo
    ├── memgraph.py
    ├── connection.py
    └── models.py
-``` 
+```
 We will use a very simple data model that can be easily upgraded later on.<br />
 There is only one node with the label `User` and each `User` has two properties, a numerical `id` and a string `name`. Nodes are connected with edges of the type `FRIENDS`:
- 
+
 <p align="center">
 <img src="https://github.com/g-despot/images/blob/master/user.png?raw=true" alt="Data Model" width="250"/>
 <p/>
- 
+
 There are several methods to populate our database ([more on that here](https://docs.memgraph.com/memgraph/how-to-guides-overview/import-data)) but we will be doing it manually by executing **openCypher** queries so you can get a better understanding of how to communicate with the database. You will find all the necessary queries to populate the database in the files [`data_big.txt`](https://github.com/g-despot/sng-demo/blob/master/resources/data_big.txt) and [`data_small.txt`](https://github.com/g-despot/sng-demo/blob/master/resources/data_small.txt). The former just has a larger dataset than the latter.<br />
 In the project root directory create a folder called `resources` and place the files in it. Now you can add an import method to your web application.<br />
 In the module `db_operations.py` add the following import and method:
- 
+
 ```python
 import json
 
@@ -294,9 +284,9 @@ def populate_database(db, path):
           db.execute_query(line)
 ```
 The method `clear()` deletes any data that might have been left in the database before populating it.<br />
-The method `populate_database()` reads all of the **openCypher** queries in the specified file and executes them.<br /> 
+The method `populate_database()` reads all of the **openCypher** queries in the specified file and executes them.<br />
 In the module `app.py` change the imports and method `index()` to:
- 
+
 ```python
 from flask import Flask, render_template, request, jsonify, make_response
 from sng_demo.database import Memgraph
@@ -325,12 +315,12 @@ The result should be:
 
 We also need a method in our app to fetch all the relevant data from the database when a client requests it.<br />
 Let’s call it `get_graph()` and place it in the `db_operations.py` module:
- 
+
 ```python
 def get_graph(db):
    command = "MATCH (n1)-[e:FRIENDS]-(n2) RETURN n1,n2,e;"
    relationships = db.execute_and_fetch(command)
- 
+
    link_objects = []
    node_objects = []
    added_nodes = []
@@ -338,30 +328,30 @@ def get_graph(db):
        e = relationship['e']
        data = {"source": e.nodes[0], "target": e.nodes[1]}
        link_objects.append(data)
- 
+
        n1 = relationship['n1']
        if not (n1.id in added_nodes):
            data = {"id": n1.id, "name": n1.properties['name']}
            node_objects.append(data)
            added_nodes.append(n1.id)
- 
+
        n2 = relationship['n2']
        if not (n2.id in added_nodes):
            data = {"id": n2.id, "name": n2.properties['name']}
            node_objects.append(data)
            added_nodes.append(n2.id)
    data = {"links": link_objects, "nodes": node_objects}
- 
+
    return json.dumps(data)
 ```
- 
+
 First, we need to execute the **openCypher** query `MATCH (n1)-[e:FRIENDS]-(n2) RETURN n1,n2,e;` and return its results from the database. These results will contain all the edges in the graph as well as all the nodes that are connected to those edges. Nodes that don't have connections will not be returned and that's ok for now.<br /><br />
 The results (the object `relationships`) are in the form of a generator which we can iterate over and access its contents by using the node/edge names specified in our initial query (`n1`,`n2` and `e`).<br />
 We also need to check if a node has already been appended to the `node_objects` list because multiple edges can contain (point to or from) the same node. All of the objects are stored in key-value pairs suitable for later JSON conversion.<br />
-The final result is a JSON object containing: 
+The final result is a JSON object containing:
 * `links`: all the relationships that are in the graph as pairs of `source` and `target` id properties,
-* `nodes`: all the nodes from the graph that form relationships with other nodes. 
- 
+* `nodes`: all the nodes from the graph that form relationships with other nodes.
+
 In your `app.py` module add the following method:
 
 ```python
@@ -393,11 +383,11 @@ In short, we fetch all the nodes and edges from the database and add them to an 
    <img src="https://github.com/g-despot/images/blob/master/sng_d3.png?raw=true" alt="Data Model" width="600"/>
 <p/>
 <br />
- 
+
 
 ## Additional Functionalities
- 
- 
+
+
 Go ahead and copy the file [`query.js`](https://github.com/g-despot/sng-demo/blob/master/static/js/query.js) to the directory `static/js` and [`query.html`](https://github.com/g-despot/sng-demo/blob/master/templates/query.html) to the directory `templates`. You can find the updated `base.html` file [here](https://github.com/g-despot/sng-demo/blob/master/templates/base.html). Copy the necessary methods from the [db_operations.py](https://github.com/g-despot/sng-demo/blob/master/sng_demo/db_operations.py) module and [app.py](https://github.com/g-despot/sng-demo/blob/master/app.py) module.<br />
 After you made the changes, just open http://localhost:5000/query/ and see the results.<br />
 This page will make your life easier if you want to debug the data being fetched from the server. It returns all the nodes or edges and shows them in a JSON highlighted format.<br /><br />

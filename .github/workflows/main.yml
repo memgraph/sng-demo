@@ -1,0 +1,15 @@
+on: [push]
+
+jobs:
+  build_container_with_docker:
+    runs-on: ubuntu-latest
+    name: Build container with Docker
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Build docker image and run a smoke test
+      id: build_docker_image
+      run: |
+        docker-compose up --build --detach
+        sleep 10
+        docker-compose stop
