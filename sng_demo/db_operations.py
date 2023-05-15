@@ -53,20 +53,20 @@ def get_graph(db):
     added_nodes = []
     for relationship in relationships:
         e = relationship['e']
-        data = {"source": e.nodes[0], "target": e.nodes[1]}
+        data = {"source": e._nodes[0], "target": e._nodes[1]}
         link_objects.append(data)
 
         n1 = relationship['n1']
-        if not (n1.id in added_nodes):
-            data = {"id": n1.id, "name": n1.properties['name']}
+        if not (n1._id in added_nodes):
+            data = {"id": n1._id, "name": n1._properties['name']}
             node_objects.append(data)
-            added_nodes.append(n1.id)
+            added_nodes.append(n1._id)
 
         n2 = relationship['n2']
-        if not (n2.id in added_nodes):
-            data = {"id": n2.id, "name": n2.properties['name']}
+        if not (n2._id in added_nodes):
+            data = {"id": n2._id, "name": n2._properties['name']}
             node_objects.append(data)
-            added_nodes.append(n2.id)
+            added_nodes.append(n2._id)
     data = {"links": link_objects, "nodes": node_objects}
 
     return json.dumps(data)
