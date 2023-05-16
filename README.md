@@ -8,3 +8,16 @@ Our use case is a Social Network Graph (in the code referred to as **SNG** for c
 <p align="center">
    <img src="https://github.com/g-despot/images/blob/master/sng_demo_screenshot.png?raw=true" alt="Data Model" width="900"/>
 <p/>
+
+## Start the app
+
+Here are the instructions on how to build and start the app:
+
+```
+docker-compose build
+docker-compose up
+```
+
+Once the app is up, head over to the `localhost:5000` to see the demo.
+
+To learn how we built the demo, read  our [blog post](https://memgraph.com/blog/how-to-visualize-a-social-network-in-python-with-a-graph-database).
